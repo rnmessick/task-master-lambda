@@ -14,6 +14,10 @@ public class HistoryObj {
         this.action = action;
     }
 
+    public HistoryObj(String status) {
+        this.action = status;
+    }
+
 
     public String getTime() {
         return time;

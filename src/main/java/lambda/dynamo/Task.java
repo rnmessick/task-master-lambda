@@ -100,7 +100,7 @@ public class Task {
 
     // ---------------- Methods ----------------
 
-    public void addHistory() {
+    public void addHistory(HistoryObj newHistory) {
         HistoryObj historyObj = new HistoryObj(new Date().toString(), this.status);
         this.history.add(historyObj);
     }

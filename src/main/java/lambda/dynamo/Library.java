@@ -11,6 +11,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
+import java.util.ArrayList;
+
 public class Library {
     private DynamoDB dynamoDb;
     private String DYNAMODB_TABLE_NAME = "taskmaster";
@@ -28,9 +30,23 @@ public class Library {
         final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper ddbMapper = new DynamoDBMapper(ddb);
 
-        ddbMapper.save(task);
+        Task newTask = new Task(task.getId(), task.getTitle(), task.getDescription(), task.getAssignee(), task.getImage());
 
-        return task;
+        if (task.getId() != null) {
+            Task t = ddbMapper.load(Task.class, task.getId());
+
+            ArrayList<HistoryObj> oldHistory = t.getHistory();
+            HistoryObj newHistory = new HistoryObj(newTask.getStatus());
+            oldHistory.add(newHistory);
+
+            newTask.setHistory(oldHistory);
+        } else {
+            HistoryObj newHistory = new HistoryObj(newTask.getStatus());
+            newTask.addHistory(newHistory);
+        }
+        ddbMapper.save(newTask);
+
+        return newTask;
 
     }
 
