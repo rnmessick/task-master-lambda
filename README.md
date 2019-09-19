@@ -3,13 +3,13 @@
 
 ## supporting images
 
-![Image of deleteTask Success](..\resources\testingdeleteTask.JPG)
+![Image of deleteTask Success](https://github.com/rnmessick/task-master-lambda/blob/master/src/main/resources/testingdeleteTask.JPG)
 
-![Image of getAllTasks Success](..\resources\testingGetAllTasks.JPG)
+![Image of getAllTasks Success](https://github.com/rnmessick/task-master-lambda/blob/master/src/main/resources/testingGetAllTasks.JPG)
 
-![Image of getTasksByUser Success](..\resources\testingGetAllUserTasks.JPG)
+![Image of getTasksByUser Success](https://github.com/rnmessick/task-master-lambda/blob/master/src/main/resources/testingGetAllUserTasks.JPG)
 
-![Image of database](..\resources\db.JPG)
+![Image of database](https://github.com/rnmessick/task-master-lambda/blob/master/src/main/resources/db.JPG)
 
 ## credits and contributions
 - Matt Stuhring
