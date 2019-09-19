@@ -8,23 +8,21 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class Library {
     private DynamoDB dynamoDb;
     private String DYNAMODB_TABLE_NAME = "taskmaster";
     private Regions REGION = Regions.US_WEST_2;
 
-    public boolean logMe(Context context) {
-        LambdaLogger logger = context.getLogger();
-        logger.log("This has been logged: " + context.toString());
-        return true;
-
-    }
-
+    //test: works
     public Task saveTask(Task task, Context context) {
 
         final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
@@ -45,10 +43,79 @@ public class Library {
             newTask.addHistory(newHistory);
         }
         ddbMapper.save(newTask);
-
         return newTask;
+    }
+    //test: fail
+    public Task updateStatus(Task task) {
+        final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
+        DynamoDBMapper ddbMapper = new DynamoDBMapper(ddb);
 
+        Task taskToUpdate = ddbMapper.load(Task.class, task.getId());
+
+        if (taskToUpdate.getStatus().equals("Available")) {
+            taskToUpdate.setStatus("Assigned");
+        } else if (taskToUpdate.getStatus().equals("Assigned")) {
+            taskToUpdate.setStatus("Accepted");
+        } else if (taskToUpdate.getStatus().equals("Accepted")) {
+            taskToUpdate.setStatus("Finished");
+        }
+
+        taskToUpdate.addHistory(new HistoryObj(taskToUpdate.getStatus()));
+
+        ddbMapper.save(taskToUpdate);
+        return taskToUpdate;
+    }
+   //
+    public Task updateTaskAssignee(Task task) {
+        final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
+        DynamoDBMapper ddbMapper = new DynamoDBMapper(ddb);
+        Task taskToUpdate = ddbMapper.load(Task.class, task.getId());
+
+        String assignee = taskToUpdate.getAssignee();
+        taskToUpdate.setAssignee(assignee);
+        taskToUpdate.setStatus("Assigned");
+        taskToUpdate.addHistory(new HistoryObj(taskToUpdate.getStatus()));
+
+        ddbMapper.save(taskToUpdate);
+        return taskToUpdate;
+    }
+
+    //tested: works
+    public List<Task> getAllTasks() {
+
+        final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
+        DynamoDBMapper ddbMapper = new DynamoDBMapper(ddb);
+
+        List<Task> tasks = ddbMapper.scan(Task.class, new DynamoDBScanExpression());
+        return tasks;
+    }
+
+    //tested: works
+    public List<Task> getUserTasks(Task task) {
+        HashMap<String, AttributeValue> eav = new HashMap<>();
+        eav.put(":v1", new AttributeValue().withS(task.getAssignee()));
+
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression()
+                .withFilterExpression("assignee = :v1")
+                .withExpressionAttributeValues(eav);
+
+        final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
+        DynamoDBMapper ddbMapper = new DynamoDBMapper(ddb);
+
+        return ddbMapper.scan(Task.class, scanExpression);
+    }
+
+    //tested: works
+    public Task deleteTask(Task task) {
+        final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
+        DynamoDBMapper ddbMapper = new DynamoDBMapper(ddb);
+        Task taskToDelete = ddbMapper.load(Task.class, task.getId());
+        ddbMapper.delete(taskToDelete);
+
+        return  taskToDelete;
     }
 
 }
+
+
 

@@ -1,12 +1,15 @@
 # task-master-lambda
-Api Gateway coming soon
-## Java Insert/Update Functionality
-- Create a lambda function, in Java, that can add a record to your Taskmaster table.
-Run this only in “Test” mode
+[Api Gateway: Get all tasks](https://rulf20aywd.execute-api.us-west-2.amazonaws.com/dev/tasks/)
 
-- It should receive the same object that your API was handling earlier.
+## supporting images
 
-- Repeat for “PUT” / update functionality
+![Image of deleteTask Success](..\resources\testingdeleteTask.JPG)
+
+![Image of getAllTasks Success](..\resources\testingGetAllTasks.JPG)
+
+![Image of getTasksByUser Success](..\resources\testingGetAllUserTasks.JPG)
+
+![Image of database](..\resources\db.JPG)
 
 ## credits and contributions
 - Matt Stuhring
