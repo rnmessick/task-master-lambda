@@ -11,6 +11,8 @@
 
 ![Image of database](https://github.com/rnmessick/task-master-lambda/blob/master/src/main/resources/db.JPG)
 
+![Image of API gateway](https://github.com/rnmessick/task-master-lambda/blob/master/src/main/resources/apiGateway.JPG)
+
 ## credits and contributions
 - Matt Stuhring
 - Nhu Trinh
