@@ -12,6 +12,11 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.sns.AmazonSNS;
+import com.amazonaws.services.sns.AmazonSNSClient;
+import com.amazonaws.services.sns.AmazonSNSClientBuilder;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +26,8 @@ public class Library {
     private DynamoDB dynamoDb;
     private String DYNAMODB_TABLE_NAME = "taskmaster";
     private Regions REGION = Regions.US_WEST_2;
+    AmazonSNS sns = AmazonSNSClient.builder().build();
+    String topicArn = "arn:aws:sns:us-west-2:811508389534:TaskComplete";
 
     //test: works
     public Task saveTask(Task task, Context context) {
@@ -28,20 +35,20 @@ public class Library {
         final AmazonDynamoDB ddb = AmazonDynamoDBClientBuilder.defaultClient();
         DynamoDBMapper ddbMapper = new DynamoDBMapper(ddb);
 
-        Task newTask = new Task(task.getId(), task.getTitle(), task.getDescription(), task.getAssignee(), task.getImage());
+        Task newTask = new Task(task.getId(), task.getTitle(), task.getDescription(), task.getStatus(), task.getAssignee());
 
-        if (task.getId() != null) {
-            Task t = ddbMapper.load(Task.class, task.getId());
-
-            ArrayList<HistoryObj> oldHistory = t.getHistory();
-            HistoryObj newHistory = new HistoryObj(newTask.getStatus());
-            oldHistory.add(newHistory);
-
-            newTask.setHistory(oldHistory);
-        } else {
-            HistoryObj newHistory = new HistoryObj(newTask.getStatus());
-            newTask.addHistory(newHistory);
-        }
+//        if (task.getId() != null) {
+//            Task t = ddbMapper.load(Task.class, task.getId());
+//
+//            ArrayList<HistoryObj> oldHistory = t.getHistory();
+//            HistoryObj newHistory = new HistoryObj(newTask.getStatus());
+//            oldHistory.add(newHistory);
+//
+//            newTask.setHistory(oldHistory);
+//        } else {
+//            HistoryObj newHistory = new HistoryObj(newTask.getStatus());
+//            newTask.addHistory(newHistory);
+//        }
         ddbMapper.save(newTask);
         return newTask;
     }
@@ -58,7 +65,16 @@ public class Library {
             taskToUpdate.setStatus("Accepted");
         } else if (taskToUpdate.getStatus().equals("Accepted")) {
             taskToUpdate.setStatus("Finished");
+            //Thank you Nhu Trin for the next few lines
+            //publish a message to Amazon sns topic taskcomplete
+        } else if(taskToUpdate.getStatus().equals("Finished")) {
+            final String msg = "Task Completed";
+            final PublishRequest publishRequest = new PublishRequest(topicArn, msg);
+            final PublishResult publishResponse = sns.publish(publishRequest);
+
+            System.out.println("MessageID: " + publishResponse.getMessageId());
         }
+
 
         taskToUpdate.addHistory(new HistoryObj(taskToUpdate.getStatus()));
 
