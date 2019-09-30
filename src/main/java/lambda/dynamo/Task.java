@@ -29,12 +29,12 @@ public class Task {
     }
 
 
-    public Task(String id, String title, String description, String assignee, String image) {
+    public Task(String id, String title, String description, String assignee, String status) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.assignee = assignee;
-        this.image = image;
+        this.status = status;
         this.history = new ArrayList<>();
     }
 
